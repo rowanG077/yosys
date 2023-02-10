@@ -111,6 +111,9 @@ struct SynthEcp5Pass : public ScriptPass
 		log("        read/write collision\" (same result as setting the no_rw_check\n");
 		log("        attribute on all memories).\n");
 		log("\n");
+		log("    -pack-outreg-bram\n");
+		log("        pack registers directly at the output into blockram cells.\n");
+		log("\n");
 		log("\n");
 		log("The following commands are executed by this synthesis command:\n");
 		help_script();
@@ -118,7 +121,7 @@ struct SynthEcp5Pass : public ScriptPass
 	}
 
 	string top_opt, blif_file, edif_file, json_file;
-	bool noccu2, nodffe, nobram, nolutram, nowidelut, asyncprld, flatten, dff, retime, abc2, abc9, iopad, nodsp, vpr, no_rw_check;
+	bool noccu2, nodffe, nobram, nolutram, nowidelut, asyncprld, flatten, dff, retime, abc2, abc9, iopad, nodsp, vpr, no_rw_check, pack_outreg_bram;
 
 	void clear_flags() override
 	{
@@ -141,6 +144,7 @@ struct SynthEcp5Pass : public ScriptPass
 		iopad = false;
 		nodsp = false;
 		no_rw_check = false;
+		pack_outreg_bram = false;
 	}
 
 	void execute(std::vector<std::string> args, RTLIL::Design *design) override
@@ -237,6 +241,10 @@ struct SynthEcp5Pass : public ScriptPass
 			}
 			if (args[argidx] == "-no-rw-check") {
 				no_rw_check = true;
+				continue;
+			}
+			if (args[argidx] == "-pack-outreg-bram") {
+				pack_outreg_bram = true;
 				continue;
 			}
 			break;
@@ -405,6 +413,11 @@ struct SynthEcp5Pass : public ScriptPass
 			else if (!vpr)
 				run("techmap -map +/ecp5/cells_map.v");
 			run("opt_lut_ins -tech ecp5");
+			run("clean");
+		}
+
+		if (pack_outreg_bram) {
+			run("ecp5_pack_outreg_bram");
 			run("clean");
 		}
 

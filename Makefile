@@ -404,6 +404,9 @@ PY_GEN_SCRIPT= py_wrap_generator
 PY_WRAP_INCLUDES := $(shell python$(PYTHON_VERSION) -c "from misc import $(PY_GEN_SCRIPT); $(PY_GEN_SCRIPT).print_includes()")
 endif # ENABLE_PYOSYS
 
+LDLIBS += -lreadline
+LDLIBS += -lncurses
+
 ifeq ($(ENABLE_READLINE),1)
 CXXFLAGS += -DYOSYS_ENABLE_READLINE
 ifeq ($(OS), $(filter $(OS),FreeBSD OpenBSD NetBSD))
